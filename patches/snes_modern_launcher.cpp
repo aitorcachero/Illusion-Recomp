@@ -174,7 +174,8 @@ static void save_snes_config(const char *config_path, int fullscreen, int window
 
     const char *aspect_str = "4:3";
     if (display_aspect == 1) aspect_str = "16:9";
-    else if (display_aspect == 2) aspect_str = "16:9";
+    else if (display_aspect == 2) aspect_str = "16:10";
+    else if (display_aspect == 3) aspect_str = "1:1";
 
     fprintf(f, "[General]\n");
     fprintf(f, "Autosave = 0\n");
@@ -184,8 +185,8 @@ static void save_snes_config(const char *config_path, int fullscreen, int window
 
     fprintf(f, "[Graphics]\n");
     fprintf(f, "DisplayAspect = %s\n", aspect_str);
-    fprintf(f, "Widescreen = %d\n", widescreen ? 1 : 0);
-    fprintf(f, "IgnoreAspectRatio = %d\n", (display_aspect == 2) ? 1 : 0);
+    fprintf(f, "Widescreen = %d\n", (display_aspect == 1 || display_aspect == 2 || widescreen) ? 1 : 0);
+    fprintf(f, "IgnoreAspectRatio = %d\n", (display_aspect == 3) ? 1 : 0);
     fprintf(f, "Fullscreen = %d\n", fullscreen ? 1 : 0);
     fprintf(f, "WindowScale = %d\n", window_scale);
     fprintf(f, "NewRenderer = 0\n");
@@ -257,7 +258,9 @@ extern "C" int run_snes_modern_launcher(
             else if (sscanf(line, "VSync = %d", &v) == 1) vsync = v;
             else if (sscanf(line, "Volume = %d", &v) == 1) volume = v;
             else if (sscanf(line, "DisplayAspect = %127s", s) == 1) {
-                if (strstr(s, "16:9") || strstr(s, "1")) display_aspect = 1;
+                if (strstr(s, "16:10") || strstr(s, "Deck") || strcmp(s, "2") == 0) display_aspect = 2;
+                else if (strstr(s, "16:9") || strstr(s, "1")) display_aspect = 1;
+                else if (strstr(s, "1:1") || strstr(s, "3") || strstr(s, "Stretch")) display_aspect = 3;
                 else display_aspect = 0;
             } else if (strstr(line, "crt-soft") != NULL) {
                 linear_filter = 2; // CRT Scanlines
@@ -488,7 +491,7 @@ extern "C" int run_snes_modern_launcher(
     colors[ImGuiCol_TextDisabled]         = ImVec4(0.500f, 0.580f, 0.680f, 1.00f);
 
     int active_tab = 0; // 0: Play, 1: Picture, 2: Controls, 3: Audio
-    int active_preset = (widescreen && window_scale >= 3) ? 0 : ((widescreen && window_scale == 2) ? 1 : ((!widescreen) ? 2 : 3));
+    int active_preset = (widescreen && display_aspect == 1 && window_scale >= 3) ? 0 : ((widescreen && display_aspect == 2) ? 1 : ((!widescreen || display_aspect == 0) ? 2 : 3));
     bool running = true;
     int result_action = RECOMP_LAUNCHER_RESULT_LAUNCH;
 
@@ -746,7 +749,7 @@ extern "C" int run_snes_modern_launcher(
                 const char *sub2;
             } cards[4] = {
                 { "Recomendado", "Moderna", "1920x1080 (16:9)", "144 Hz, FOV Panorámico, Suave" },
-                { NULL, "Steam Deck", "1280x800 (16:9)", "60 Hz, Portátil, Eficiente" },
+                { NULL, "Steam Deck", "1280x800 (16:10)", "60 Hz, FOV 16:10 Nativo" },
                 { NULL, "Original 1994", "1280x960 (4:3)", "60 Hz, Píxel Nítido / Retro" },
                 { NULL, "Personalizado", "Ajustable", "Configura en Picture o Play" }
             };
@@ -798,7 +801,7 @@ extern "C" int run_snes_modern_launcher(
                     if (i == 0) { // Modern
                         fullscreen = 1; window_scale = 3; widescreen = 1; display_aspect = 1; linear_filter = 1; vsync = 1; refresh_rate = 0; integer_scaling = 0; color_mode = 1;
                     } else if (i == 1) { // Steam Deck
-                        fullscreen = 1; window_scale = 2; widescreen = 1; display_aspect = 1; linear_filter = 1; vsync = 1; refresh_rate = 60; integer_scaling = 0; color_mode = 1;
+                        fullscreen = 1; window_scale = 2; widescreen = 1; display_aspect = 2; linear_filter = 1; vsync = 1; refresh_rate = 60; integer_scaling = 0; color_mode = 1;
                     } else if (i == 2) { // Original 1994
                         fullscreen = 0; window_scale = 3; widescreen = 0; display_aspect = 0; linear_filter = 0; vsync = 1; refresh_rate = 60; integer_scaling = 1; color_mode = 1;
                     }
@@ -813,25 +816,30 @@ extern "C" int run_snes_modern_launcher(
             ImGui::TextColored(ImVec4(0.90f, 0.93f, 0.98f, 1.0f), "Mejoras del Motor:");
             if (font_bold) ImGui::PopFont();
 
-            // Hack Panorámico 16:9
+            // Modo Panorámico (FOV Real)
             if (font_regular) ImGui::PushFont(font_regular);
-            ImGui::TextColored(ImVec4(0.75f, 0.80f, 0.90f, 1.0f), "Hack Panor\xc3\xa1mico 16:9 (FOV Real):");
+            ImGui::TextColored(ImVec4(0.75f, 0.80f, 0.90f, 1.0f), "Modo Panor\xc3\xa1mico (FOV Real):");
             ImGui::SameLine(320.0f * scale);
-            if (widescreen) {
-                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 0.45f, 0.0f, 0.95f));
-                ImGui::Button("Activado (recomendado)##ws_on", ImVec2(0, 36.0f * scale));
-                ImGui::PopStyleColor();
-                ImGui::SameLine();
-                if (ImGui::Button("Desactivado##ws_off", ImVec2(0, 36.0f * scale))) { widescreen = 0; display_aspect = 0; active_preset = 3; }
-            } else {
-                if (ImGui::Button("Activado##ws_on", ImVec2(0, 36.0f * scale))) { widescreen = 1; display_aspect = 1; active_preset = 3; }
-                ImGui::SameLine();
-                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.20f, 0.28f, 0.42f, 0.95f));
-                ImGui::Button("Desactivado##ws_off", ImVec2(0, 36.0f * scale));
-                ImGui::PopStyleColor();
+            const char *ws_modes[] = { "16:9 (PC/TV)", "16:10 (Deck)", "4:3 Original" };
+            for (int m = 0; m < 3; m++) {
+                if (m > 0) ImGui::SameLine(0, 8.0f * scale);
+                int m_aspect = (m == 0) ? 1 : ((m == 1) ? 2 : 0);
+                bool is_cur = (display_aspect == m_aspect);
+                float bw = (m == 0) ? 130.0f * scale : ((m == 1) ? 130.0f * scale : 110.0f * scale);
+                if (is_cur) {
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 0.45f, 0.0f, 0.95f));
+                    ImGui::Button(ws_modes[m], ImVec2(bw, 36.0f * scale));
+                    ImGui::PopStyleColor();
+                } else {
+                    if (ImGui::Button(ws_modes[m], ImVec2(bw, 36.0f * scale))) {
+                        display_aspect = m_aspect;
+                        widescreen = (m_aspect != 0) ? 1 : 0;
+                        active_preset = 3;
+                    }
+                }
             }
             ImGui::TextColored(ImVec4(0.55f, 0.63f, 0.74f, 1.0f),
-                               "Extiende el campo de visi\xc3\xb3n de la c\xc3\xa1mara a 16:9 widescreen nativo sin deformar sprites ni estirar la imagen.");
+                               "Extiende el campo de visi\xc3\xb3n de la c\xc3\xa1mara a 16:9 o 16:10 nativo sin deformar sprites ni estirar la imagen.");
 
             ImGui::Dummy(ImVec2(0, 6.0f * scale));
 
@@ -915,11 +923,11 @@ extern "C" int run_snes_modern_launcher(
             // Aspecto
             ImGui::Text("Modo de Pantalla / Aspecto:");
             ImGui::SameLine(320.0f * scale);
-            const char *asp_opts[] = { "4:3 Clásico", "16:9 FOV Panorámico", "16:9 Estirado" };
-            for (int a = 0; a < 3; a++) {
-                if (a > 0) ImGui::SameLine();
+            const char *asp_opts[] = { "4:3 Cl\xc3\xa1sico", "16:9 Panor\xc3\xa1mico", "16:10 Steam Deck", "Estirado Completo" };
+            for (int a = 0; a < 4; a++) {
+                if (a > 0) ImGui::SameLine(0, 8.0f * scale);
                 bool is_a = (display_aspect == a);
-                float btn_w = (a == 1) ? 190.0f * scale : 120.0f * scale;
+                float btn_w = (a == 1) ? 165.0f * scale : ((a == 2) ? 150.0f * scale : 120.0f * scale);
                 if (is_a) {
                     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 0.45f, 0.0f, 0.95f));
                     ImGui::Button(asp_opts[a], ImVec2(btn_w, 30.0f * scale));
@@ -927,7 +935,7 @@ extern "C" int run_snes_modern_launcher(
                 } else {
                     if (ImGui::Button(asp_opts[a], ImVec2(btn_w, 30.0f * scale))) {
                         display_aspect = a;
-                        widescreen = (a == 1) ? 1 : 0;
+                        widescreen = (a == 1 || a == 2) ? 1 : 0;
                         active_preset = 3;
                     }
                 }

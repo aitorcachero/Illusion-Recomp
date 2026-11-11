@@ -47,3 +47,5 @@ android/app/src/main/assets/
 .DS_Store
 
 /android/
+
+.github/
