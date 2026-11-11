@@ -1,115 +1,100 @@
-# Illusion of Time Recomp
+# Illusion of Time SNES Recomp (Native PC & Linux Port)
 
-A native recompilation of **Illusion of Time** (ESP), built on
-[snesrecomp](https://github.com/RetroPortingToolKit/snesrecomp).
+[![Build Linux Native Release](https://github.com/aitorcachero/Illusion-Recomp/actions/workflows/build-linux.yml/badge.svg)](https://github.com/aitorcachero/Illusion-Recomp/actions/workflows/build-linux.yml)
+[![Release](https://img.shields.io/github/v/release/aitorcachero/Illusion-Recomp)](https://github.com/aitorcachero/Illusion-Recomp/releases)
+[![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](LICENSE)
 
-_Add a short description here._
+*Read this in [Español (README_ES.md)](README_ES.md).*
 
+A high-performance native PC (Windows 64-bit and Linux x86_64) and Android port of the Super Nintendo classic **Illusion of Time** (known in North America as *Illusion of Gaia*, official Spanish / ESP PAL release), built via static recompilation using the [snesrecomp](https://github.com/RetroPortingToolKit/snesrecomp) framework.
 
+---
 
-> **You must legally own a copy of the game.** No ROM data is distributed with
-> this project, in the repository or in any release. The recompiled C is
-> generated locally from your own copy and is never committed.
+## 🌟 Key Features
 
-## Status
+* **🖥️ Native Resolution up to 4K UHD:** Razor-sharp rendering on modern desktop and TV displays with free or integer scaling.
+* **📺 True 16:9 Widescreen FOV Expansion:** Broadens the horizontal camera view to native 16:9 without stretching or distorting character sprites.
+* **🚀 Modern High-DPI Setup Launcher:**
+  * Clean *Deep Navy & Vibrant Orange* design with DPI scaling relative to 1080p.
+  * Instant cover art showcase.
+  * Integrated ROM browser (`GetOpenFileName` on Windows / `zenity`/`kdialog` on Linux).
+  * Quick Presets: **Modern (16:9 1080p+ 144Hz)**, **Steam Deck (1280x800)**, **Original 1994 (4:3 Retro)**, and **Custom**.
+  * Dynamic Refresh Rate selection: **60 Hz**, **144 Hz**, **240 Hz**, **360 Hz**, and **Auto** (synced to your display).
+* **🎨 Advanced Shaders:**
+  * **HD-2D Remaster:** Subpixel smoothing and edge micro-contrast.
+  * **CRT Soft & Warm Composite:** Authentic scanlines and vintage CRT phosphor warmth.
+  * **xBR-lv2 & FXAA:** Clean anti-aliasing without blurring.
+  * **Sharp HD:** Crisp pixel-perfect scaling.
+* **🎮 Universal Gamepad Detection:** Hotplug plug & play support for Xbox, PlayStation (DualShock 4 / DualSense), Nintendo Switch Pro, and standard SDL3 controllers.
+* **🔊 Pristine SNES SPC700 Audio:** Cycle-accurate S-DSP synthesis running at 48,000 Hz / 16-bit stereo with minimal buffer latency.
+* **⏪ Real-time Rewind & Quick Save:** Rewind up to 60 seconds with F12 and save/load instantly across slots F1-F10.
+* **📱 Multiplatform:** Android phone and Android TV builds available.
 
-Scaffolded on 2026-11-02 — **not yet a working port.** The layout, build,
-regeneration pipeline, CI, and packaging are wired up; the game does not run
-until the host work in `src/game_rtl.c` is done. See
-[Porting from here](#porting-from-here).
+---
 
-## ROM identity
+## ⚠️ Legal Notice
 
-| | |
-|---|---|
-| File | `Illusion of Time (ESP).sfc` |
-| Publisher | — |
-| Developer | — |
-| Year | — |
-| Mapping | hirom |
-| Region | ESP (Spain) |
-| Coprocessor | none |
-| CRC32 | `7c305dc8` |
-| SHA-256 | `7b98fd832f3012d902f7c312ca542f84385c6f0e883b04205cbecd769cf3e4b1` |
+> **You must legally own an original physical cartridge or ROM copy of the game.**  
+> This repository contains no copyrighted game ROMs, proprietary binaries, or assets owned by Nintendo or Enix / Quintet. The executable loads your own legally acquired dump of `Illusion of Time (ESP).sfc`.
 
-`tools/regen.sh` refuses to run against anything else, so a mismatched
-revision fails immediately instead of producing subtly wrong output.
+### Compatible ROM Information
 
-## Build
+| Property | Value |
+| :--- | :--- |
+| **Title** | Illusion of Time |
+| **Region** | Spain / Spanish (ESP) |
+| **Filename** | `Illusion of Time (ESP).sfc` (or `.smc`) |
+| **Memory Map** | HiROM |
+| **CRC32** | `7c305dc8` |
+| **SHA-256** | `7b98fd832f3012d902f7c312ca542f84385c6f0e883b04205cbecd769cf3e4b1` |
 
-```sh
-git submodule update --init --recursive
-bash tools/regen.sh --rom /path/to/Illusion of Time (ESP).sfc
+---
+
+## 🕹️ Quick Start
+
+### Windows:
+1. Download `Illusion_of_Time_Recompiled_v1.0_Windows_x64.zip` from [Releases](https://github.com/aitorcachero/Illusion-Recomp/releases).
+2. Extract the archive into any directory.
+3. Place your `Illusion of Time (ESP).sfc` ROM in the game folder (or click *Browse* in the launcher).
+4. Double-click **`JUGAR.bat`** (or launch `IllusionOfTimeSNESRecomp.exe`).
+
+### Linux:
+1. Download `Illusion_of_Time_Recompiled_v1.0_Linux_x64.tar.gz` from [Releases](https://github.com/aitorcachero/Illusion-Recomp/releases).
+2. Extract the archive:
+   ```bash
+   tar -xzf Illusion_of_Time_Recompiled_v1.0_Linux_x64.tar.gz
+   cd Illusion_of_Time_Linux_x64
+   ```
+3. Copy your `Illusion of Time (ESP).sfc` ROM into the folder.
+4. Launch the game:
+   ```bash
+   chmod +x JUGAR.sh IllusionOfTimeSNESRecomp
+   ./JUGAR.sh
+   ```
+
+---
+
+## ⌨️ Controls
+
+| In-Game Action | Keyboard | Gamepad (Xbox / PlayStation / Switch) |
+| :--- | :--- | :--- |
+| **Move** | Arrows / W A S D | D-Pad / Left Stick |
+| **Attack / Run** | Z / Space | A (Cross / B) |
+| **Flute / Talk** | X | B (Circle / A) |
+| **Telekinesis Shield** | C / V | LB / RB (L / R) |
+| **Inventory / Menu** | Enter | Start / Options |
+| **Transform** | Shift / S | Y / X |
+| **Toggle Fullscreen** | Alt + Enter / F11 | Guide / Touchpad |
+| **Rewind** | F12 | L3 + R3 |
+| **Quit Game** | Escape | Back / Select |
+
+---
+
+## 🛠️ Building from Source
+
+```bash
+git clone --recursive https://github.com/aitorcachero/Illusion-Recomp.git
+cd Illusion-Recomp
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build -j
+cmake --build build --config Release -j
 ```
-
-The ROM does not have to live in the repository — keeping it on your own
-drive is the better habit, and `SNESRECOMP_ROM` sets the path once for a
-shell. Without either, `tools/regen.sh` finds `Illusion of Time (ESP).sfc` at the repo root,
-then the path the setup wizard recorded in `rom.cfg`; `.gitignore` blocks
-both from ever being committed.
-
-`tools/regen.sh` verifies the ROM, generates `src/gen/*.c`, and re-syncs
-`recomp/funcs.h`. Re-run it whenever you change anything under `recomp/`.
-
-## Run
-
-```sh
-./build/IllusionOfTimeSNESRecomp                     # launcher picks the ROM
-./build/IllusionOfTimeSNESRecomp /path/to/Illusion of Time (ESP).sfc # or name it and skip the launcher
-```
-
-With no ROM on the command line the build opens the recomp-ui launcher: a ROM
-picker with a verification badge, plus display / audio / input settings. Your
-choice is cached in `rom.cfg` beside the executable, so the next launch opens
-on it and "Skip launcher on boot" makes it immediate. If the launcher is not
-built in (`--no-recomp-ui`), the host falls back to a native file picker.
-
-Either way the ROM is checked against the digests above before anything boots
-— a dump that could not have produced this build is refused at the door rather
-than mis-executing ten frames in.
-
-## Layout
-
-| Path | What lives there |
-|---|---|
-| `recomp/` | Analysis input: `bank*.cfg`, `symbols.toml`, generated `funcs.h` |
-| `rom_identity.txt` | ROM digests — read by the build, `tools/regen.sh` and CI |
-| `src/` | Host code you own: `main.c`, `game_rtl.c` |
-| `src/gen/` | Generated C. Never committed — regenerate locally |
-| `snesrecomp/` | Framework submodule (owns `lib/recomp-net`, `lib/retcomm-rbengine`) |
-| `tools/` | `regen.sh` — the ROM → C pipeline |
-| `scripts/` | `package_release.sh` — player-facing zip |
-| `framework_pins.txt` | Exact framework commits this project was scaffolded against |
-
-## Porting from here
-
-The scaffold stops where the game-specific work starts. In rough order:
-
-1. **Make it boot.** `src/game_rtl.c` holds the frame driver. It starts on
-   the framework's beam-aligned driver (`snesrecomp/runner/src/beam_frame_driver.h`):
-   one frame per PPU field, interrupts taken where the beam latches them,
-   the field rasterized from the raster journal. A title whose main loop it
-   does not fit replaces those calls with its own driver.
-2. **Name things.** Add entries to `recomp/symbols.toml` as you identify
-   routines, then re-run `tools/regen.sh`. Set `emit = true` to promote one
-   into ahead-of-time analysis; leave it false to keep it interpreted.
-   Regen synchronizes the marked blocks in each bank cfg, creating missing
-   configs. Only proven variants become AOT code. See `recomp/README.md`.
-3. **Resolve dispatch misses.** After every run, deal with unresolved
-   indirect targets before anything else — they are the reason a port
-   diverges, and they are cheap to fix early.
-4. **Never synthesise a result** to get past uncovered code, and never edit
-   `src/gen/` by hand. Fix the config or the framework and regenerate.
-
-## Multiplayer
-
-Two players, one controller per port.
-
-## License
-
-This project's own source is under the license in `LICENSE`. The framework
-carries its own terms — see `snesrecomp/LICENSE` and
-`snesrecomp/THIRD_PARTY_ATTRIBUTION.md`. Neither covers the game data, which
-is not distributed here.

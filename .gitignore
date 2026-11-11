@@ -10,6 +10,7 @@
 *.tsv
 *.bgrx
 *.bmp
+!assets/img/*.bmp
 *.exe
 title_fill.*
 last_run_report.json
@@ -22,6 +23,15 @@ last_run_report.json
 .vs/
 *.user
 *.suo
+
+# Android build artifacts
+.gradle/
+android/.gradle/
+android/local.properties
+android/build/
+android/app/build/
+android/app/.cxx/
+android/app/src/main/assets/
 
 # Local probe output that names paths on one machine
 /rom_probe.json

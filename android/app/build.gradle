@@ -1,0 +1,94 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace = "com.mr0ta.babelrecomp"
+    compileSdkVersion 34
+    ndkVersion = "27.2.12479018"
+    defaultConfig {
+        applicationId "com.mr0ta.babelrecomp"
+        minSdkVersion 24
+        targetSdkVersion 34
+        versionCode 3
+        versionName "1.2"
+        externalNativeBuild {
+            cmake {
+                arguments "-DANDROID_PLATFORM=android-24", "-DANDROID_STL=c++_static",
+                          "-DCMAKE_BUILD_TYPE=Release",
+                          "-DSNESRECOMP_FRAME_IMPL=HLE",
+                          "-DSNESRECOMP_APU_TIME_IMPL=NATIVE",
+                          "-DSNESRECOMP_CRC32_IMPL=SLICE8",
+                          "-DCMAKE_SHARED_LINKER_FLAGS=-Wl,-z,max-page-size=16384"
+                cFlags "-O3", "-flto", "-fomit-frame-pointer"
+                cppFlags "-O3", "-flto", "-fomit-frame-pointer"
+                abiFilters 'arm64-v8a', 'armeabi-v7a'
+            }
+        }
+    }
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            path '../../CMakeLists.txt'
+            version '3.31.6'
+        }
+    }
+    lint {
+        abortOnError = false
+    }
+    sourceSets.main.assets.srcDirs = ["$buildDir/bundled"]
+}
+
+def repo = file('../..')
+tasks.register('bundleGameFiles', Copy) {
+    into "$buildDir/bundled"
+    from("$repo/recomp-ui/assets/common") { into 'assets' }
+    from("$repo/recomp-ui/assets/consoles/snes") { into 'assets'; exclude '*.json', '*.md' }
+    from("$repo/assets") { into 'assets' }
+    from("$repo/mods/preloaded/packages") { into 'mods/preloaded/packages' }
+    from("$repo") {
+        include 'Illusion of Time (ESP).sfc'
+    }
+    from("$repo") {
+        include 'Illusion of Time (ESP).sfc'
+        rename '.*\\.sfc', 'rom.sfc'
+    }
+    from("$repo") {
+        include 'keybinds.ini'
+    }
+    doLast {
+        file("$buildDir/bundled/rom.cfg").text = "Illusion of Time (ESP).sfc\n"
+        file("$buildDir/bundled/config.ini").text = """[General]
+SkipLauncher = 1
+Autosave = 0
+DisableFrameDelay = 0
+
+[Graphics]
+WindowSize = Auto
+Fullscreen = 1
+WindowScale = 1
+NewRenderer = 1
+IgnoreAspectRatio = 0
+NoSpriteLimits = 1
+
+[Sound]
+EnableAudio = 1
+Volume = 100
+AudioFreq = 48000
+AudioChannels = 2
+AudioSamples = 2048
+"""
+    }
+}
+preBuild.dependsOn bundleGameFiles
