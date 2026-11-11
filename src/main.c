@@ -79,7 +79,7 @@ static void IllusionOfTimeBeginFrame(unsigned number)
     PpuSetPal(g_ppu, true);
 
     /* If mode is 4:3 or Stretched, disable extra wide PPU rasterization */
-    if (g_config.display_aspect != 1 && g_config.display_aspect != 2 && !g_config.widescreen) {
+    if (g_config.ignore_aspect_ratio || (g_config.display_aspect != 1 && g_config.display_aspect != 2)) {
         PpuSetExtraSpace(g_ppu, 0);
         return;
     }
